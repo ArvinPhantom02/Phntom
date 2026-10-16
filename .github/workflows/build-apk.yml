@@ -16,13 +16,18 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
+      - name: Unzip project
+        run: |
+          for z in PhantomAIVision-part2*.zip; do unzip -o "$z"; done
+          ls PhantomAIVision
       - name: Download object detection model
         run: |
-          mkdir -p app/src/main/assets
-          curl -L --fail -o app/src/main/assets/efficientdet_lite0.tflite https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite
+          mkdir -p PhantomAIVision/app/src/main/assets
+          curl -L --fail -o PhantomAIVision/app/src/main/assets/efficientdet_lite0.tflite https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite
       - name: Build debug APK
+        working-directory: PhantomAIVision
         run: gradle assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: PhantomAIVision-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: PhantomAIVision/app/build/outputs/apk/debug/*.apk
