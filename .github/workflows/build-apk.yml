@@ -1,9 +1,7 @@
 name: Build APK
 on:
-  workflow_dispatch:
   push:
-    branches: [ main, master ]
-
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,21 +10,19 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
-      - uses: gradle/actions/setup-gradle@v4
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: '8.7'
+          gradle-version: 8.7
       - name: Unzip project
-        run: |
-          for z in PhantomAIVision-part2*.zip; do unzip -o "$z"; done
-          ls PhantomAIVision
-      - name: Download object detection model
+        run: unzip -o PhantomAIVision-guard.zip
+      - name: Download model
         run: |
           mkdir -p PhantomAIVision/app/src/main/assets
-          curl -L --fail -o PhantomAIVision/app/src/main/assets/efficientdet_lite0.tflite https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite
-      - name: Build debug APK
+          curl -L -o PhantomAIVision/app/src/main/assets/efficientdet_lite0.tflite https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite
+      - name: Build
         working-directory: PhantomAIVision
-        run: gradle assembleDebug --no-daemon
+        run: gradle assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: PhantomAIVision-apk
