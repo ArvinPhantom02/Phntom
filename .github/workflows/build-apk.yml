@@ -2,9 +2,14 @@ name: Build APK
 on:
   push:
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      BASE: https://storage.googleapis.com/mediapipe-models
+      MODEL: object_detector/efficientdet_lite0/float16/1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -18,12 +23,14 @@ jobs:
         run: unzip -o PhantomAIVision-guard.zip
       - name: Download model
         run: |
-          mkdir -p PhantomAIVision/app/src/main/assets
-          curl -L -o PhantomAIVision/app/src/main/assets/efficientdet_lite0.tflite https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite
+          D=PhantomAIVision/app/src/main/assets
+          mkdir -p $D
+          curl -L -o $D/efficientdet_lite0.tflite $BASE/$MODEL/efficientdet_lite0.tflite
       - name: Build
         working-directory: PhantomAIVision
         run: gradle assembleDebug
-      - uses: actions/upload-artifact@v4
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: PhantomAIVision-apk
-          path: PhantomAIVision/app/build/outputs/apk/debug/*.apk
+          tag_name: build-${{ github.run_number }}
+          files: PhantomAIVision/app/build/outputs/apk/debug/app-debug.apk
