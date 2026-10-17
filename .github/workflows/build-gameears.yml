@@ -1,0 +1,42 @@
+name: Build GameEars
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'PhantomGameEars.zip'
+      - '.github/workflows/build-gameears.yml'
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      BASE: https://storage.googleapis.com/mediapipe-models
+      MODEL: object_detector/efficientdet_lite0/float16/1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.7
+      - name: Unzip project
+        run: unzip -o PhantomGameEars.zip
+      - name: Download model
+        run: |
+          D=PhantomGameEars/app/src/main/assets
+          mkdir -p $D
+          curl -L -o $D/efficientdet_lite0.tflite $BASE/$MODEL/efficientdet_lite0.tflite
+      - name: Build
+        working-directory: PhantomGameEars
+        run: gradle assembleDebug
+      - name: Rename
+        run: cp PhantomGameEars/app/build/outputs/apk/debug/app-debug.apk PhantomEars.apk
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ears-${{ github.run_number }}
+          name: Phantom Ears ${{ github.run_number }}
+          files: PhantomEars.apk
