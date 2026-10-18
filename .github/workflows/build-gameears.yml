@@ -40,3 +40,4 @@ jobs:
           tag_name: ears-${{ github.run_number }}
           name: Phantom Ears ${{ github.run_number }}
           files: PhantomEars.apk
+# test
