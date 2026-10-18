@@ -23,7 +23,7 @@ jobs:
         with:
           gradle-version: 8.7
       - name: Unzip project
-        run: unzip -o PhantomGameEars2.zip
+        run: unzip -o PhantomGameEars4.zip
       - name: Download model
         run: |
           D=PhantomGameEars/app/src/main/assets
